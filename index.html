@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Perfume Formulator</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #f9f9f9;
+      color: #333;
+    }
+    .container {
+      max-width: 600px;
+      margin: 50px auto;
+      padding: 20px;
+      background: #fff;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      border-radius: 8px;
+    }
+    h1 {
+      text-align: center;
+      color: #4CAF50;
+    }
+    .form-group {
+      margin-bottom: 15px;
+    }
+    label {
+      font-weight: bold;
+      display: block;
+      margin-bottom: 5px;
+    }
+    input, textarea, select {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      font-size: 14px;
+    }
+    button {
+      background-color: #4CAF50;
+      color: white;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 16px;
+    }
+    button:hover {
+      background-color: #45a049;
+    }
+    .output {
+      margin-top: 20px;
+      padding: 10px;
+      background: #f1f1f1;
+      border-radius: 5px;
+    }
+    .output h3 {
+      color: #333;
+    }
+    .output pre {
+      background: #e9e9e9;
+      padding: 10px;
+      border-radius: 5px;
+      overflow-x: auto;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Perfume Formulator</h1>
+    <form id="perfumeForm">
+      <div class="form-group">
+        <label for="inspiration">Inspiration</label>
+        <input type="text" id="inspiration" name="inspiration" placeholder="e.g., life" required>
+      </div>
+      <div class="form-group">
+        <label for="purpose">Purpose</label>
+        <textarea id="purpose" name="purpose" placeholder="e.g., longevity, happiness, energy freedom" rows="3" required></textarea>
+      </div>
+      <div class="form-group">
+        <label for="persona">Client Persona</label>
+        <input type="text" id="persona" name="persona" placeholder="e.g., Syamnath male 30s" required>
+      </div>
+      <div class="form-group">
+        <label for="style">Style</label>
+        <textarea id="style" name="style" placeholder="e.g., friendly, genuine, loyal" rows="3" required></textarea>
+      </div>
+      <div class="form-group">
+        <label for="location">Locational Preference</label>
+        <input type="text" id="location" name="location" placeholder="e.g., Worldwide" required>
+      </div>
+      <div class="form-group">
+        <label for="exclusions">Exclusions</label>
+        <textarea id="exclusions" name="exclusions" placeholder="e.g., headache triggers, eucalyptus" rows="3"></textarea>
+      </div>
+      <button type="button" onclick="generateFormulation()">Generate</button>
+    </form>
+    <div class="output" id="output" style="display:none;">
+      <h3>Formulation Result:</h3>
+      <pre id="result"></pre>
+    </div>
+  </div>
+
+  <script>
+    async function generateFormulation() {
+      const form = document.getElementById("perfumeForm");
+      const formData = new FormData(form);
+      const inputData = {
+        inspiration: formData.get("inspiration"),
+        purpose: formData.get("purpose"),
+        persona: formData.get("persona"),
+        style: formData.get("style"),
+        location: formData.get("location"),
+        exclusions: formData.get("exclusions"),
+      };
+
+      document.getElementById("output").style.display = "block";
+      document.getElementById("result").textContent = "Processing...";
+
+      try {
+        const response = await fetch("https://api.openai.com/v1/engines/davinci-codex/completions", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": "Bearer NNqaem4aKlMzCci2BY4ugH4zr8UQe73Fgz7eG4WOC2pOQkF4_sF4KgTVSpyrYbo_0utVJfz0WiT3BlbkFJpSyackDevKaavnlMmOx8OWBHQf8HT-0EEyKuGDSSlAMU3IDfYAsgMH8wZd2QVik7HvBvyVHbIA", // Replace with your OpenAI API key
+          },
+          body: JSON.stringify({
+            prompt: `Use the following inputs to create a refined perfume formulation:\n${JSON.stringify(inputData, null, 2)}\nFormat the result as: \n1. Formulation Table (Note type, Ingredient, Role, Drops)\n2. Scent Classification\n3. Creative Name\n4. Color Suggestion\n5. Artistic Description.`,
+            max_tokens: 500,
+          }),
+        });
+
+        if (!response.ok) {
+          throw new Error("Error generating formulation");
+        }
+
+        const data = await response.json();
+        document.getElementById("result").textContent = data.choices[0].text.trim();
+      } catch (error) {
+        document.getElementById("result").textContent = `Error: ${error.message}`;
+      }
+    }
+  </script>
+</body>
+</html>
